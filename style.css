@@ -1,0 +1,12 @@
+body {
+	background-color: rgb(32,32,32);
+	font-size: 1em;
+	color: rgb(128,128,128);
+	font-family: "Arial", Arial, sans-serif;
+	box-sizing:border-box;
+	margin: 0px;
+}
+canvas {
+	width:100vw;
+	height:100vh;
+}
