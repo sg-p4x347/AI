@@ -8,11 +8,17 @@ class MovementSystem extends WorldSystem {
 	Update(elapsed) {
 		var self = this;
 		self.Entities.forEach((entity) => {
-			let position = entity.Get(Position);
-			let movement = entity.Get(Movement);
-			position.Pos.X += movement.Velocity.X * elapsed;
-			position.Pos.Y += movement.Velocity.Y * elapsed;
+            MovementSystem.UpdatePosition(entity.Get(Position),entity.Get(Movement), elapsed);
 		});
 	}
-	
+    static UpdatePosition(position,movement,elapsed) {
+        position.Pos.X += movement.Velocity.X * elapsed;
+        position.Pos.Y += movement.Velocity.Y * elapsed;
+        position.Rot += movement.AngularVelocity * elapsed;
+    }
+    static FuturePos(entity, elapsed) {
+        let position = entity.Get(Position).Copy();
+        MovementSystem.UpdatePosition(position, entity.Get(Movement), elapsed);
+        return position;
+    }
 }

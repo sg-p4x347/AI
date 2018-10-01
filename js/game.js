@@ -5,11 +5,13 @@ class Game {
 		this.m_runningSystems = [];
 		this.WEM = new WorldEntityManager();
 		this.m_systems.push(new TerrainSystem(this.WEM));
-		let renderSystem = new RenderSystem(this.WEM,canvas);
-		this.m_systems.push(renderSystem);
-		this.m_systems.push(new PlayerSystem(this.WEM));
-		this.m_systems.push(new MovementSystem(this.WEM));
-		this.m_systems.push(new CollisionSystem(this.WEM));
+        this.m_systems.push(new RenderSystem(this.WEM, canvas));
+        this.m_systems.push(new PlayerSystem(this.WEM));
+        // Physics ==========
+        this.m_systems.push(new CollisionSystem(this.WEM));
+        this.m_systems.push(new MovementSystem(this.WEM));
+        
+        //===================
 		this.m_viewer = null;
 	}
 	New() {

@@ -6,6 +6,9 @@ class Position extends WorldComponent {
 	}
 	get Mask() {
 		return Position.Mask;
-	}
+    }
+    Copy() {
+        return new Position(this.Pos.Copy(), this.Rot);
+    }
 }
 Position.Mask = Math.pow(2,WorldComponent.Mask++);

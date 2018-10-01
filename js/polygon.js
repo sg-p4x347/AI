@@ -49,7 +49,11 @@ class Polygon extends WorldComponent {
             y += (this.Vertices[i].Y + this.Vertices[(i + 1) % n].Y) * (this.Vertices[i].X * this.Vertices[(i + 1) % n].Y - this.Vertices[(i + 1) % n].X * this.Vertices[i].Y);
         }
         var sixthArea = 1 / (6 * this.Area());
-        return new Vector(x * sixthArea, y * sixthArea);
+        return new Vector2(x * sixthArea, y * sixthArea);
+    }
+    get Radius() {
+        let center = this.Center();
+        return this.Vertices.Max((vertex) => Vector2.Distance(vertex, center));
     }
     Transform(matrix) {
         this.Vertices.forEach(function (vertex) {
@@ -147,6 +151,99 @@ class Polygon extends WorldComponent {
             if (self.Intersects(polygon))
                 return true;
         });
+    }
+
+    static GjkIntersection(a, b, params) {
+        let initialAxis = new Vector2(0, 1);
+        params = params ? params : {};
+        let A = Polygon.Support(a, initialAxis).Subtract(Polygon.Support(b, initialAxis.Scale(-1)));
+        params.s = [A.Copy()];
+        params.d = A.Copy().Scale(-1);
+        while (true) {
+            A = Polygon.Support(a, params.d).Subtract(Polygon.Support(b, params.d.Scale(-1)));
+            if (A.Dot(params.d) < 0) {
+                return false;
+            }
+            params.s.push(A.Copy());
+            if (Polygon.NearestSimplex(params)) {
+                return true;
+            }
+        }
+    }
+    static Support(polygon, d) {
+        let maxIndex = null;
+        let max = -Infinity;
+        polygon.Vertices.forEach((v,i) => {
+            let value = v.Dot(d);
+            if (maxIndex === null || value > max) {
+                max = value;
+                maxIndex = i;
+            }
+        });
+        return polygon.Vertices[maxIndex];
+    }
+    static NearestSimplex(params) {
+        let aO = params.s[params.s.length - 1].Scale(-1);
+        if (params.s.length === 2) {
+            let a = params.s[1];
+            let b = params.s[0];
+            let ab = b.Subtract(a);
+
+            if (ab.Dot(aO) > 0) {
+                let normal = ab.Normal();
+                if (normal.Dot(aO) > 0) {
+                    params.d = normal.Scale(Math.abs(aO.Cross(ab) / ab.Length));
+                } else {
+                    params.d = normal.Scale(-Math.abs(aO.Cross(ab) / ab.Length));
+                }
+                
+                return false;
+            } else {
+                params.s = [a];
+                params.d = aO;
+                return false;
+            }
+        } else if (params.s.length === 3) {
+            let a = params.s[2];
+            let b = params.s[1];
+            let c = params.s[0];
+
+            let ab = b.Subtract(a);
+            let ac = c.Subtract(a);
+
+            let direction = ac.Normal().Scale(Math.abs(aO.Cross(ac) / ac.Length));
+
+            if (direction.Dot(aO) > 0) {
+
+                if (ac.Dot(aO) > 0) {
+                    params.s = [c, a];
+                    params.d = direction;
+                    return false;
+                }
+            }
+            direction = ab.Normal().Scale(-Math.abs(aO.Cross(ac) / ac.Length));
+            if (direction.Dot(aO) > 0) {
+                if (ab.Dot(aO) > 0) {
+                    params.s = [b, a];
+                    params.d = direction;
+                    return false;
+                } else {
+                    params.s = [a];
+                    params.d = aO;
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+    static ClosestPoint(a, b) {
+        let d1 = b.Subtract(a).Dot(a);
+        let d2 = a.Subtract(b).Dot(a);
+        let dX = d1 + d2;
+
+        return a.Scale(d1).Add(b.Scale(d2)).Scale(1 / dX);
+
     }
 }
 Polygon.Mask = Math.pow(2,WorldComponent.Mask++);

@@ -28,6 +28,9 @@ class Vector2 {
 	Dot(b) {
         return (this.X * b.X + this.Y * b.Y);
     }
+    Cross(b) {
+        return (this.X * b.Y) - (this.Y * b.X);
+    }
     Scale(scalar) {
         return new Vector2(this.X * scalar, this.Y * scalar);
     }
@@ -38,7 +41,7 @@ class Vector2 {
         return new Vector2(this.X - b.X, this.Y - b.Y);
     }
     Normal() {
-        var normal = new Vector2(this.Y, -this.X);
+        var normal = new Vector2(-this.Y, this.X);
         normal.Normalize();
         return normal;
     }
